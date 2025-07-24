@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi ChatGPT Pro</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 800px;
+            padding: 40px;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 40px;
+            font-size: 1.1em;
+        }
+
+        .chat-container {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+            min-height: 400px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .messages-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            min-height: 250px;
+            max-height: 400px;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .message {
+            margin-bottom: 20px;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .user-message {
+            text-align: right;
+        }
+
+        .user-message .message-content {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 18px 18px 4px 18px;
+            display: inline-block;
+            max-width: 70%;
+            word-wrap: break-word;
+        }
+
+        .ai-message {
+            text-align: left;
+        }
+
+        .ai-message .message-content {
+            background: #e9ecef;
+            color: #333;
+            padding: 12px 20px;
+            border-radius: 18px 18px 18px 4px;
+            display: inline-block;
+            max-width: 70%;
+            word-wrap: break-word;
+        }
+
+        .input-container {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        #promptInput {
+            flex: 1;
+            padding: 15px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 25px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+        #promptInput:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        #sendButton {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        #sendButton:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        #sendButton:active {
+            transform: translateY(0);
+        }
+
+        #sendButton:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .error-message {
+            background: #fee;
+            color: #c33;
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+
+        .welcome-message {
+            text-align: center;
+            color: #999;
+            padding: 60px 20px;
+            font-style: italic;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            justify-content: center;
+        }
+
+        .action-btn {
+            background: white;
+            border: 2px solid #e0e0e0;
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+
+        .action-btn:hover {
+            border-color: #667eea;
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 25px;
+            }
+
+            h1 {
+                font-size: 2em;
+            }
+
+            .message-content {
+                max-width: 85% !important;
+            }
+
+            .input-container {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            #promptInput,
+            #sendButton {
+                width: 100%;
+            }
+
+            .action-buttons {
+                flex-wrap: wrap;
+            }
+
+            .action-btn {
+                flex: 1 1 calc(50% - 5px);
+                min-width: 120px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Mi ChatGPT Pro</h1>
+        <p class="subtitle">Asistente inteligente potenciado por IA</p>
+        
+        <div class="action-buttons">
+            <button class="action-btn" onclick="clearChat()">🆕 Nueva Conversación</button>
+            <button class="action-btn" onclick="exportChat()">💾 Exportar Chat</button>
+        </div>
+        
+        <div class="chat-container">
+            <div class="messages-area" id="messagesArea">
+                <div class="welcome-message">
+                    ¡Hola! Soy tu asistente personalizado. ¿En qué puedo ayudarte hoy?
+                </div>
+            </div>
+            
+            <div class="input-container">
+                <input 
+                    type="text" 
+                    id="promptInput" 
+                    placeholder="Escribe tu pregunta aquí..."
+                    onkeypress="handleKeyPress(event)"
+                >
+                <button id="sendButton" onclick="sendQuery()">
+                    Ejecutar Consulta
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const messagesArea = document.getElementById('messagesArea');
+        const promptInput = document.getElementById('promptInput');
+        const sendButton = document.getElementById('sendButton');
+        let messageHistory = [];
+        
+        function handleKeyPress(event) {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                sendQuery();
+            }
+        }
+        
+        function addMessage(content, isUser) {
+            // Eliminar mensaje de bienvenida si existe
+            const welcomeMsg = document.querySelector('.welcome-message');
+            if (welcomeMsg) {
+                welcomeMsg.remove();
+            }
+            
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user-message' : 'ai-message'}`;
+            
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'message-content';
+            contentDiv.textContent = content;
+            
+            messageDiv.appendChild(contentDiv);
+            messagesArea.appendChild(messageDiv);
+            
+            // Guardar en historial
+            messageHistory.push({
+                content: content,
+                isUser: isUser,
+                time: new Date().toLocaleTimeString()
+            });
+            
+            // Scroll al final
+            messagesArea.scrollTop = messagesArea.scrollHeight;
+        }
+        
+        function showLoading() {
+            const loadingDiv = document.createElement('div');
+            loadingDiv.className = 'message ai-message';
+            loadingDiv.id = 'loadingMessage';
+            
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'message-content';
+            contentDiv.innerHTML = '<div class="loading"></div> Procesando...';
+            
+            loadingDiv.appendChild(contentDiv);
+            messagesArea.appendChild(loadingDiv);
+            messagesArea.scrollTop = messagesArea.scrollHeight;
+        }
+        
+        function hideLoading() {
+            const loadingMsg = document.getElementById('loadingMessage');
+            if (loadingMsg) {
+                loadingMsg.remove();
+            }
+        }
+        
+        async function sendQuery() {
+            const prompt = promptInput.value.trim();
+            
+            if (!prompt) {
+                return;
+            }
+            
+            // Deshabilitar input y botón
+            promptInput.disabled = true;
+            sendButton.disabled = true;
+            
+            // Agregar mensaje del usuario
+            addMessage(prompt, true);
+            
+            // Limpiar input
+            promptInput.value = '';
+            
+            // Mostrar indicador de carga
+            showLoading();
+            
+            try {
+                const response = await fetch('https://xampy.app.n8n.cloud/webhook/1116aeb3-d7c6-4ced-82d2-ca8662a46692', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        prompt: prompt
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`Error HTTP: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                // Ocultar indicador de carga
+                hideLoading();
+                
+                // Agregar respuesta del AI
+                if (data.respuesta) {
+                    addMessage(data.respuesta, false);
+                } else {
+                    addMessage('No se recibió una respuesta válida.', false);
+                }
+                
+            } catch (error) {
+                console.error('Error:', error);
+                hideLoading();
+                
+                // Mostrar mensaje de error
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'error-message';
+                errorDiv.textContent = 'Error al conectar con el servidor. Por favor, intenta de nuevo.';
+                messagesArea.appendChild(errorDiv);
+                messagesArea.scrollTop = messagesArea.scrollHeight;
+            } finally {
+                // Rehabilitar input y botón
+                promptInput.disabled = false;
+                sendButton.disabled = false;
+                promptInput.focus();
+            }
+        }
+        
+        function clearChat() {
+            if (messageHistory.length > 0 && confirm('¿Estás seguro de que quieres limpiar la conversación?')) {
+                messagesArea.innerHTML = `
+                    <div class="welcome-message">
+                        ¡Conversación limpiada! Empecemos de nuevo.
+                    </div>
+                `;
+                messageHistory = [];
+            }
+        }
+        
+        function exportChat() {
+            if (messageHistory.length === 0) {
+                alert('No hay mensajes para exportar');
+                return;
+            }
+            
+            let content = 'Conversación de Mi ChatGPT\n';
+            content += '========================\n\n';
+            
+            messageHistory.forEach(msg => {
+                const role = msg.isUser ? 'Usuario' : 'AI';
+                content += `[${msg.time}] ${role}:\n${msg.content}\n\n`;
+            });
+            
+            // Crear blob y descargar
+            const blob = new Blob([content], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `chat_${new Date().toISOString().slice(0, 10)}.txt`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+        
+        // Focus inicial en el input
+        promptInput.focus();
+    </script>
+</body>
+</html>
